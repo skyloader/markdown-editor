@@ -35,6 +35,7 @@ __DATA__
       <h2>Markdown</h2>
       <textarea id="editor-markdown" class="span6" rows="28"></textarea>
       <button id="editor-apply" class="btn btn-primary pull-right" type="button">Apply</button>
+      <button id="editor-save" class="btn btn-primary pull-right" type="button" style ="padding-right 50px">Save</button>
     </div>
     <div class="span6">
       <h2>HTML</h2>
