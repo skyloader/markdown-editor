@@ -32,10 +32,14 @@ __DATA__
 <div id="editor-layout" class="container">
   <div class="row">
     <div class="span6">
-      <h2>Markdown</h2>
-      <textarea id="editor-markdown" class="span6" rows="28"></textarea>
-      <button id="editor-apply" class="btn btn-primary pull-right" type="button">Apply</button>
-      <button id="editor-save" class="btn btn-primary pull-right" type="button" style ="padding-right 50px">Save</button>
+      <section class="editor">
+        <h2>Markdown</h2>
+        <textarea id="editor-markdown" class="span6" rows="24"></textarea>
+        <p>
+          <button id="editor-save" class="btn btn-primary pull-right" type="button">Save</button>
+          <button id="editor-apply" class="btn btn-primary pull-right" type="button">Apply</button>
+        </p>
+      </section>
     </div>
     <div class="span6">
       <h2>HTML</h2>
@@ -52,7 +56,8 @@ __DATA__
 
     <!-- Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/style.css" rel="stylesheet" media="screen">
   </head>
 
   <body>
@@ -112,5 +117,4 @@ __DATA__
     </div>
   </form>
 </div>
-
 
