@@ -407,6 +407,257 @@ UUID로 인해서 file명은 난해하지만 어쨌든 동작은 잘 됩니다!
 감사합니다.
 
 
+전체code
+--------
+markdown-editor.pl
+
+	#!/usr/bin/env perl
+	use strict;
+	use utf8;                                       # for hangle
+	use warnings;
+	
+	use Mojolicious::Lite;
+	use File::Slurp;
+	use File::Spec::Functions;
+	use Text::MultiMarkdown;
+	use UUID::Tiny;
+	
+	my $m = Text::MultiMarkdown->new;
+	
+	# Documentation browser under "/perldoc"
+	plugin 'PODRenderer';
+	
+	get '/' => sub {
+	  my $self = shift;
+	
+	  $self->render('editor');
+	};
+	
+	post '/convert' => sub {
+	    my $self = shift;
+	
+	    my $markdown = $self->param('markdown') || q{};
+	    my $html = $m->markdown($markdown);
+	    return $self->render_json( { html=> $html } );
+	};
+	
+	post '/save' => sub {
+	    my $self = shift;
+	
+	    my $markdown = $self->param('markdown');
+	    my $view     = $self->param('view');
+	    my $uuid     = create_UUID_as_string();
+	    write_file( catfile(app->home, 'mkd', $uuid), { binmode => ':utf8' }, $markdown );
+	
+	    return $self->render_json( { url => "/$view/$uuid" } );
+	};
+	
+	get '/markdown/:uuid' => sub {
+	    my $self = shift;
+	
+	    my $uuid = $self->param('uuid');
+	    my $markdown = read_file( catfile(app->home, 'mkd', $uuid), binmode => ':utf8' );
+	
+	    $self->res->headers->header('Content-Disposition' => qq{'attachment; filename="$uuid.mkd"'}); 
+	    return $self->render_text($markdown);
+	};
+	
+	get '/html/:uuid' => sub {
+	    my $self = shift;
+	
+	    my $uuid = $self->param('uuid');
+	    my $markdown = read_file( catfile(app->home, 'mkd', $uuid), binmode => ':utf8');
+	
+	    $self->stash( markdown => $m->markdown($markdown) );   
+	    return $self->render('html-viewer');
+	};
+	
+	app->start;
+	
+	__DATA__
+	
+	@@ editor.html.ep
+	% layout 'default';
+	% title 'Seoul.pm Markdown Editor';
+	<div id="editor-layout" class="container">
+	  <div class="row">
+	    <div class="span6">
+	      <section class="editor">
+	        <h2>Markdown</h2>
+	        <form>
+	          <fieldset>
+	            <textarea id="editor-markdown" class="span6" rows="26"></textarea>
+	          </fieldset>
+	        </form>
+	      </section>
+	    </div>
+	    <div class="span6">
+	      <h2>HTML</h2>
+	      <div id="editor-html"></div> 
+	    </div>
+	  </div>
+	</div>
+	
+	@@ html-viewer.html.ep
+	% layout 'viewer';
+	% title 'Seoul.pm Markdown HTML Viewer';
+	<div class="container">
+	  <div class="row">
+	    <div class="span8">
+	      <%== $markdown %>
+	    </div>
+	  </div>
+	</div>
+	
+	@@ layouts/default.html.ep
+	<!DOCTYPE html>
+	<html>
+	  <head>
+	    <title><%= title %></title>
+	
+	    <!-- Bootstrap -->
+	    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <link href="/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+	    <link href="/css/style.css" rel="stylesheet" media="screen">
+	  </head>
+	
+	  <body>
+	    <div class="navbar navbar-static-top">
+	  	  <div class="navbar-inner">
+	  	    <div class="container">
+	  	      <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse"></a>
+	  	      <a class="brand" href="#">Seoul.pm Markdown Editor</a>
+	  	      <div class="nav-collapse collapse navbar-responsive-collapse">
+	  	        <ul class="nav">
+	  	          <li class="dropdown">
+	  	            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu<b class="caret"></b></a>
+	  	            <ul class="dropdown-menu">
+	  	              <li id="save-markdown"><a href="#">Save Markdown</a></li>
+	  	              <li class="divider"></li>
+	  	              <li id="open-html"><a href="#" target="viewer">Open HTML at New Tab</a></li>
+	  	            </ul>
+	  	          </li>
+	  	        </ul>
+	  	      </div><!-- /.nav-collapse -->
+	  	    </div>
+	  	  </div><!-- /navbar-inner -->
+	    </div><!-- /navbar -->
+	
+	    <%= content %>
+	    <script src="/jquery-1.8.3.min.js"></script>
+	    <script src="/bootstrap/js/bootstrap.min.js"></script>
+	    <script src="/markdown-editor.js"></script>
+	  </body>
+	</html>
+	
+	@@ layouts/viewer.html.ep
+	<!DOCTYPE html>
+	<html>
+	  <head>
+	    <title><%= title %></title>
+	
+	    <!-- Bootstrap -->
+	    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <link href="/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+	    <link href="/css/style.css" rel="stylesheet" media="screen">
+	  </head>
+	
+	  <body>
+	    <div class="navbar navbar-static-top">
+	  	  <div class="navbar-inner">
+	  	    <div class="container">
+	  	      <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse"></a>
+	  	      <a class="brand" href="/">Seoul.pm Markdown Editor</a>
+	  	    </div>
+	  	  </div><!-- /navbar-inner -->
+	    </div><!-- /navbar -->
+	
+	    <%= content %>
+	    <script src="/jquery-1.8.3.min.js"></script>
+	    <script src="/bootstrap/js/bootstrap.min.js"></script>
+	  </body>
+	</html>
+
+
+markdown-editor.js
+
+	$(document).ready(function() {
+	  function markdown_to_html() {
+	    var markdown = $("#editor-markdown").val();
+	    $.post(
+	      "/convert",
+	      { "markdown" : markdown },
+	      function(data) { $("#editor-html").html(data.html); },
+	      "json"
+	    );
+	  }
+	
+	  function open_html() {
+	    var markdown = $("#editor-markdown").val();
+	    // http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data
+	    $.post(
+	      "/save",
+	      {
+	        "markdown" : markdown,
+	        "view"     : 'html'
+	      },
+	      function(data) {
+	        window.open(data.url, 'viewer');
+	      },
+	      "json"
+	    );
+	  }
+	
+	  function save_markdown() {
+	    var markdown = $("#editor-markdown").val();
+	    // http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data
+	    $.post(
+	      "/save",
+	      {
+	        "markdown" : markdown,
+	        "view"     : 'markdown',
+	      },
+	      function(data) {
+	        $("body").append("<iframe src='" + data.url + "' style='display: none;' ></iframe>");
+	      },
+	      "json"
+	    );
+	  }
+	 
+	  $("#open-html").click(function() { open_html(); });
+	  $("#save-markdown").click(function() { save_markdown(); });
+	
+	  // converting markdown if enter is pressed
+	  $("#editor-markdown").keyup(function(e) {
+	    if ( e.keyCode == 13 ) {
+	      markdown_to_html();
+	    };
+	  });
+	  
+	  // timer to converting markdown for each 10 sec
+	  var timer = setInterval(function() {
+	    markdown_to_html();
+	  }, 10000);
+	
+	  // force converting markdown when page is loading
+	  markdown_to_html();
+	
+	  // fix HTML area height
+	  $("#editor-html").height( $('#editor-markdown').height()  + 7);
+	
+	});
+
+style.css
+
+	textarea {
+	  font-family: Monospace;
+	}
+	
+	#editor-html {
+	 overflow-y: auto;
+	 border: 1px solid #CCCCCC;
+	}
+
 [markdown-syntax]: http://daringfireball.net/projects/markdown/syntax/
 [wikipedia]: http://en.wikipedia.org/wiki/Markdown/
 [john-gruber]: http://daringfireball.net/projects/markdown/
