@@ -4,7 +4,7 @@ skyloader - 백만년째 Perl초보 skyloader_at_gmail.com
 
 시작하면서
 ---------
-Terminal창을 열어 쀠익--지지징-삑삑 소리를 들으며 PC통신을 시작하던 90년대를 불과 10년도 채 지나지 않아 세상은 완전한 Web세상으로 들어섰습니다. 그리고 온갖 종류의 웹 서비스들이 창궐하면서 미니홈피 및 각종 블로그들이 난립하며 1일 1홈페이지 시대가 열렸죠. 
+Terminal창을 열어 쀠익--지지징-삑삑 소리를 들으며 PC통신을 시작하던 90년대를 불과 10년도 채 지나지 않아 세상은 완전한 Web세상으로 들어섰습니다. 그리고 온갖 종류의 웹 서비스들이 창궐하면서 미니홈피 및 각종 블로그들이 난립하며 1인 1홈페이지 시대가 열렸죠. 
 Web이 개인의 삶에 깊숙이 들어온 만큼 Web언어인 HTML도 자주 접하게 되었습니다. 그러나 전공자가 아닌이상 HTML은 부두교의 주술같이 기괴한 < \/>의 나열일뿐, 도통 알아보기 힘들었죠. 하물며 직접 HTML을 하나하나 타자쳐가며 어떤 페이지의  내용을 적는다는 것은 방망이 깍는 노인에 버금가는 장인정신과 집중력이 필요한 작업으로 어지간한 편집증적 타자덕후가 아니면 힘들 것입니다. 때문에 웹서비스에서는 여러가지 editor를 제공해 왔습니다. 
 
 그러나 Web 서비스 벤더들이 제공하는 editor들로 만들어진 페이지의 HTML은 너무나도 많은 불필요한 HTML element들과 style로 어지러웠습니다. 마치 나침반과 캘리퍼스가 달린 볼펜으로 화선지 글을적는 것 처럼 너무 과도한 결과였던 겁니다. 이러면, 아무래도 reuse가 힘들겠죠. 
@@ -14,6 +14,7 @@ Markdown은 John Gruber와 Aaron Swartz에 의해 만들어졌으며, edting 도
 즉, HTML과 같은 Markup 언어가 보여지는데 초점이 있다면, Markdown은 적는(writing)에 초점이 있다고 할 수 있습니다.
 얼마나 간단한지 보도록 하죠.
 
+    #!plain
     이 문장은 H1 입니다.
     ======
     이 문장은 H2 입니다.
@@ -25,6 +26,7 @@ Markdown은 John Gruber와 Aaron Swartz에 의해 만들어졌으며, edting 도
 
 위의 문장은 각각 다음의 HTML로 변환됩니다.
 
+    #!html
     <h1 id="h1.">이 문장은 H1 입니다.</h1>
     <h2 id="h2.">이 문장은 H2 입니다.</h2>
 
@@ -42,7 +44,7 @@ Markdown은 John Gruber와 Aaron Swartz에 의해 만들어졌으며, edting 도
 이런 작은 것들이 쌓여 결국은 누군가에게 진입장벽이 됩니다. 
 이자리에서는 이러한 진입장벽을 낮추고자, 누구나 쉽게 이용가능한 Markdown web editor를 만들어 보기로 합니다.
 
-우리에게 필요한 것
+작업 연장 챙기기
 -----------------
 
 제일 먼저 필요한 것은 Markdown 문서를 HTML로 변환시켜 주는 Module 입니다.
@@ -105,6 +107,7 @@ Directory 구조가 다음과 같이 되겠네요.
 
 ![workspace][img-01]
 
+mkd directory는 나중에 markdown file을 저장할 때 쓰이므로 미리 만들어 두도록 합시다.
     
 다홍치마 만들기
 --------------
@@ -118,8 +121,290 @@ Directory 구조가 다음과 같이 되겠네요.
 
 먼서 상단 Navigation Bar를 구성할 적당한 예제를 찾아 보도록 합시다. [Navigation Bar][navbar] 로 들어가서 적당한 예제를 찾아 예제 code를 긁어와도 되고, 혹은 [FireBug][firebug]등의 툴을 이용해서 원하는 부분의 code를 가져 옵니다.
 다음과 같은 Navigation Bar를 만들기 위해 다음과 같이 가져온 code를 수정하였습니다.
-![navbar][img-01]
 
+    #!perl
+	@@ layouts/default.html.ep
+	<!DOCTYPE html>
+	<html>
+	  <head>
+	    <title><%= title %></title>
+	
+	    <!-- Bootstrap -->
+	    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <link href="/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+	  </head>
+	
+	  <body>
+	    <div class="navbar navbar-static-top">
+	  	  <div class="navbar-inner">
+	  	    <div class="container">
+	  	      <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse"></a>
+	  	      <a class="brand" href="#">Seoul.pm Markdown Editor</a>
+	  	      <div class="nav-collapse collapse navbar-responsive-collapse">
+	  	        <ul class="nav">
+	  	          <li class="dropdown">
+	  	            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Menu<b class="caret"></b></a>
+	  	            <ul class="dropdown-menu">
+	  	              <li id="save-markdown"><a href="#">Save Markdown</a></li>
+	  	              <li class="divider"></li>
+	  	              <li id="open-html"><a href="#" target="viewer">Open HTML at New Tab</a></li>
+	  	            </ul>
+	  	          </li>
+	  	        </ul>
+	  	      </div><!-- /.nav-collapse -->
+	  	    </div>
+	  	  </div><!-- /navbar-inner -->
+	    </div><!-- /navbar -->
+	
+	    <%= content %>
+	    <script src="/jquery-1.8.3.min.js"></script>
+	    <script src="/bootstrap/js/bootstrap.min.js"></script>
+	  </body>
+	</html>
+
+이제 다시 Web browser로 가서 새로고침을 해봅시다. 과연 원하는대로 되었을 까요~?  두둥!
+
+![navbar][img-02]
+
+되는 군요! 이기세를 몰아 text영역을 만듭니다. Bootstrap은 [Grid system][grid]도 아주 훌륭하게 지원합니다.
+markdown-editor.pl에서 기본으로 있던 index page는 삭제하고 새로이 editor.htmp.ep page를 생성합니다. 
+여기에 Grid를 넣도록 합니다.
+
+
+    #!perl
+	@@ editor.html.ep
+	% layout 'default';
+	% title 'Seoul.pm Markdown Editor';
+	<div id="editor-layout" class="container">
+	  <div class="row">
+	    <div class="span6">
+	      <section class="editor">
+	        <h2>Markdown</h2>
+	        <form>
+	          <fieldset>
+	            <textarea id="editor-markdown" class="span6" rows="26"></textarea>
+	          </fieldset>
+	        </form>
+	      </section>
+	    </div>
+	    <div class="span6">
+	      <h2>HTML</h2>
+	      <div id="editor-html"></div> 
+	    </div>
+	  </div>
+	</div>
+
+역시 다시 새로고침해서 봅시다.
+
+![navbar][img-03]
+
+이정도면 기본적은 모양새는 같춘 것 같습니다. 이제 실제 어떻게 기능을 구현할지 알아 봅시다.
+
+
+내실 갖추기
+----------------
+
+Markdown을 HTML로 보여주는 충실한 editor로써 어떤 기능이 필요한지 다시 생각해 봅시다.
+
+    1. 일단 기본적으로, 좌측의 Text box에 적힌 Markdown글을 우측으로 변환해 주는 기능이 필요하구요.
+    2. 생각해 보니 적었으면 저장을 해야 겠군요.
+    3. 결과물을 화면 반쪽으로만 볼려니 좀 답답한 감이 있네요. 새탭을 열어서 크게 봅시다.
+
+###Markdown변환
+일단 Markdown을 HTML로 바꾸는 것에 대해서 생각해 봅시다. Text::MultiMarkdown module을 이용합시다.
+그럼 언제 변환을 할까요? 사용상의 편의를 위해 처음 page가 load 되었을 때, Text box에서 Enter key가 눌러졌을때,  멍때리며 10초 있을 때 정도가 적당한 것 같군요. 한번 구현해 봅시다.
+과정은 간단합니다. markdown-editor.pl 에 변환용 page로 */convert* 를 만들고, Text box에 있는 값을 jQuery를 이용해서 가져옵니다.
+그리고, jQuery로 '/convert' 로 text를 post로 보내면, /convert에서 HTML로 변환해서 다시 jQuery에서 call한 함수로 값을 보냅니다.
+그다음에는 그냥 HTML영역에 줄 잘 맞춰서 뿌려주면 됩니다
+
+데이터의 흐름을 보자면 *Text box* -> *jQuery function* -> *markdown-editor.pl* -> *jQeury function calback* -> *HTML area* 가 되는 것이죠.
+
+	#!perl
+	# markdown-edtor.pl
+	post '/convert' => sub {
+	    my $self = shift;
+	
+	    my $markdown = $self->param('markdown') || q{};
+	    my $html = $m->markdown($markdown);
+	    return $self->render_json( { html=> $html } );
+	};
+	
+	
+    #!java
+    // markdown-editor.js
+	$(document).ready(function() {
+	  function markdown_to_html() {
+	    var markdown = $("#editor-markdown").val();
+	    $.post(
+	      "/convert",
+	      { "markdown" : markdown },
+	      function(data) { $("#editor-html").html(data.html); },
+	      "json"
+	    );
+	  }
+	
+	  // converting markdown if enter is pressed
+	  $("#editor-markdown").keyup(function(e) {
+	    if ( e.keyCode == 13 ) {
+	      markdown_to_html();
+	    };
+	  });
+	
+	  // timer to converting markdown for each 10 sec
+	  var timer = setInterval(function() {
+	    markdown_to_html();
+	  }, 10000);
+	
+	  // force converting markdown when page is loading
+	  markdown_to_html();
+	});
+
+###저장하기
+DB를 사용하지 않고 file을 저장하기 위해 구글느님의 힘을 빌어 stackoverflow에서 나왔던 방법으로 저장을 할려 합니다.
+[javascript-jquery-to-download-file-via-post-with-json-data](http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data)
+이 방법은 Text box내용을 일단 UUID를 이용하여 서버단의 mkd directory에 저장하고, iframe을 위한 다운로드 링크를 보내주면, jQuery의 콜백에서 iframe을 동적으로 만들어서 다운로드 받을 수 있는 다이얼로그 상자가 생기도록 하는 방법입니다.
+
+    #!perl
+	post '/save' => sub {
+	    my $self = shift;
+	
+	    my $markdown = $self->param('markdown');
+	    my $view     = $self->param('view');
+	    my $uuid     = create_UUID_as_string();
+	    write_file( catfile(app->home, 'mkd', $uuid), { binmode => ':utf8' }, $markdown );
+	
+	    return $self->render_json( { url => "/$view/$uuid" } );
+	};
+	
+	get '/markdown/:uuid' => sub {
+	    my $self = shift;
+	
+	    my $uuid = $self->param('uuid');
+	    my $markdown = read_file( catfile(app->home, 'mkd', $uuid), binmode => ':utf8' );
+	
+	    $self->res->headers->header('Content-Disposition' => qq{'attachment; filename="$uuid.mkd"'}); 
+	    return $self->render_text($markdown);
+	};
+	
+    #!java
+	  function save_markdown() {
+	    var markdown = $("#editor-markdown").val();
+	    // http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data
+	    $.post(
+	      "/save",
+	      {
+	        "markdown" : markdown,
+	        "view"     : 'markdown',
+	      },
+	      function(data) {
+	        $("body").append("<iframe src='" + data.url + "' style='display: none;' ></iframe>");
+	      },
+	      "json"
+	    );
+	  }
+
+      $("#save-markdown").click(function() { save_markdown(); });
+
+![save][img-04]
+UUID로 인해서 file명은 난해하지만 어쨌든 동작은 잘 됩니다!
+
+###새로운 탭에서 열기
+요즘 대부분의 화면들이 와이드기 때문에 화면의 절반이라도 해도 사실 작업하는데는 큰 문제는 없습니다.
+그러나 최종적인 결과물이 화면에 어떻게 뿌려질지는 한번쯤은 확인을 하고 싶은 것도 사실이죠.
+그래서 새탭에서 HTML을 열도록 했습니다. 
+방법은 save와 매우 비슷합니다. mkd directory에 저장을 하는 것 까지는 동일하고요, 그 뒤에, mkd file경로를 포함한 HTML link를 콜백으로 보내면, jQuery에서 새로운 browser tab를 띄워서 보여주는 방법입니다. 
+ 통일성을 위해 새로운 탭용 layout이 추가로 필요하기도 합니다.
+
+	#!perl
+	get '/html/:uuid' => sub {
+	    my $self = shift;
+	
+	    my $uuid = $self->param('uuid');
+	    my $markdown = read_file( catfile(app->home, 'mkd', $uuid), binmode => ':utf8');
+	
+	    $self->stash( markdown => $m->markdown($markdown) );   
+	    return $self->render('html-viewer');
+	};
+	@@ html-viewer.html.ep
+	% layout 'viewer';
+	% title 'Seoul.pm Markdown HTML Viewer';
+	<div class="container">
+	  <div class="row">
+	    <div class="span8">
+	      <%== $markdown %>
+	    </div>
+	  </div>
+	</div>
+	
+	@@ layouts/viewer.html.ep
+	<!DOCTYPE html>
+	<html>
+	  <head>
+	    <title><%= title %></title>
+	
+	    <!-- Bootstrap -->
+	    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <link href="/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+	    <link href="/css/style.css" rel="stylesheet" media="screen">
+	  </head>
+	
+	  <body>
+	    <div class="navbar navbar-static-top">
+	  	  <div class="navbar-inner">
+	  	    <div class="container">
+	  	      <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse"></a>
+	  	      <a class="brand" href="/">Seoul.pm Markdown Editor</a>
+	  	    </div>
+	  	  </div><!-- /navbar-inner -->
+	    </div><!-- /navbar -->
+	
+	    <%= content %>
+	    <script src="/jquery-1.8.3.min.js"></script>
+	    <script src="/bootstrap/js/bootstrap.min.js"></script>
+	  </body>
+	</html>
+	
+	
+	
+	#!java
+	  function open_html() {
+	    var markdown = $("#editor-markdown").val();
+	    // http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data
+	    $.post(
+	      "/save",
+	      {
+	        "markdown" : markdown,
+	        "view"     : 'html'
+	      },
+	      function(data) {
+	        window.open(data.url, 'viewer');
+	      },
+	      "json"
+	    );
+	  }
+	
+	  $("#open-html").click(function() { open_html(); });
+
+잘 되나 확인을 해 봅니다.
+
+![tab][img-05]
+
+정리하기
+--------
+
+지금까지 한작업을 봅시다. 얼마 길지 않았던 작업 같지만 실제로는 많을 작업을 해주었습니다. 
+어디한번 볼까요?
+
+    + web서버를 띄우고, 
+    + Twitter Bootstrap을 사용한 UI를 구성하고, 
+    + Text::MultiMarkdown을 이용해서 text를 HTML로 변환하고,
+    + jQuery를 이용해서 현재 화면을 유지하면서 변환된 HTML을 바로 화면에 뿌려주고,
+    + UUID를 이용해서 Markdown 글을 저장하기
+
+그 결과 웹서버에 올려 놓고 어디서나 사용할 수 있는 근사한 editor가 탄생하였습니다.
+이제 Markdown으로 인해 끙끙될 일은 벗어난 것 같군요. 
+여기에서 한단계 더 발전시켜 어떻게 활용할 지는 이제 여러분의 몫입니다.
+감사합니다.
 
 
 [markdown-syntax]: http://daringfireball.net/projects/markdown/syntax/
@@ -134,4 +419,8 @@ Directory 구조가 다음과 같이 되겠네요.
 [navbar]: http://twitter.github.com/bootstrap/components.html#navbar
 [firebug]: https://www.getfirebug.com/
 
-[img-01]: img-01.png
+[img-01]: ./img-01.png
+[img-02]: ./img-02.png
+[img-03]: ./img-03.png
+[img-04]: ./img-04.png
+[img-05]: ./img-05.png
