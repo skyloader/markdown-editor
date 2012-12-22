@@ -17,12 +17,13 @@ Markdown은 John Gruber와 Aaron Swartz에 의해 만들어졌으며, edting 도
     #!plain
     이 문장은 H1 입니다.
     ======
+
     이 문장은 H2 입니다.
     ------
 
-    #이렇게 써도 H1 입니다. 
-    ##이렇게 쓰면 H2 입니다.
-    ###이건 H3 입니다.
+    # 이렇게 써도 H1 입니다. 
+    ## 이렇게 쓰면 H2 입니다.
+    ### 이건 H3 입니다.
 
 위의 문장은 각각 다음의 HTML로 변환됩니다.
 
@@ -52,13 +53,13 @@ Markdown은 John Gruber와 Aaron Swartz에 의해 만들어졌으며, edting 도
 cpan을 이용해서 받는다면 다음과 같이 입력하시면 됩니다.
 
     #!bash
-    $sudo cpan install Text::MultiMarkdown
+    $ sudo cpan install Text::MultiMarkdown
 
 두번째로는 웹서버를 띄우기 위해 작지만 강력함 Web framework인 [Mojolicious][mojolicious]를 설치합니다.
 홈페이지에 에서 받아도 되고, 다음과 같이 cpan을 이용하여도 됩니다.
 
     #!bash
-    $sudo cpan install Mojolicious
+    $ sudo cpan install Mojolicious
 
 세번째로는 UI 테마 입니다. 이왕이면 다홍치마라고 보기도 좋은 페이지라면 한번이라도 더 들어가고 싶겠죠? [Twitter Bootstrap][bootstrap]을 이용해서 한번 들어가면 나오지 못하고 Markdown 문서만 마구 만들어 내고 싶은 그런 페이지를 만들어 봅시다.
 [Twitter Bootstrap][bootstrap]은 비단 여기서 뿐만아니라 Web작업을 하는 사람들에게는 축복이라 불릴만큼 아름다운 UI를 무려 **공짜**로 제공하므로 꼭 알아두도록 합시다.
@@ -70,7 +71,7 @@ cpan을 이용해서 받는다면 다음과 같이 입력하시면 됩니다.
 역시 cpan을 이용하실 경우 다음과 같이 입력합니다.
 
     $!bash
-    $sudo cpan install UUID::Tiny
+    $ sudo cpan install UUID::Tiny
 
 모두 설치하였으면 이제 본격으로 시작해 봅시다. 
 
@@ -80,18 +81,18 @@ cpan을 이용해서 받는다면 다음과 같이 입력하시면 됩니다.
 일단 작업할 공간을 하나 만들도록 합시다.
 
     #!bash
-    $mkdir markdown-editor
-    $cd markdown-editor
+    $ mkdir markdown-editor
+    $ cd markdown-editor
 
 그리고 결과를 점검할 Web 서버 하나는 띄워 놓아야 겠지요. 이때 [Mojolicious][mojolicious]가 필요합니다.
 
     #!bash
-    $mojo generate lite_app
+    $ mojo generate lite_app
 
 그러면, myapp.pl이 생성됩니다. 이름은 너무 밋밋하니 markdown-editor.pl로 바꾸도록 합니다. 이제 웹서버를 띄웁니다. 
     
     #!bash
-    $morbo markdown-editor.pl
+    $ morbo markdown-editor.pl
 
 이제 아무 web browser를 띄워서 다음과 같이 주소를 적어 봅니다.
     
@@ -99,7 +100,7 @@ cpan을 이용해서 받는다면 다음과 같이 입력하시면 됩니다.
 
 화면에 다음과 같이 나오면 된것 입니다.
 
-> Welcome to the Mojolicious real-time web framework!
+![mojo-init][img-00]
 
 앞서 받아놓은 Bootstrap과 jQuery file을 Mojolicious가 이용할 수 있도록 할려면, public directory에 들어 있어야 합니다.
 현재 작업 directory에서 public directory를 만들고 그 안에 각각 Bootstrap을 압축 해제시키고, jQuery를 복사해 놓도록 합니다.
@@ -218,9 +219,9 @@ Markdown을 HTML로 보여주는 충실한 editor로써 어떤 기능이 필요�
 그다음에는 그냥 HTML영역에 줄 잘 맞춰서 뿌려주면 됩니다
 
 데이터의 흐름을 보자면 *Text box* -> *jQuery function* -> *markdown-editor.pl* -> *jQeury function calback* -> *HTML area* 가 되는 것이죠.
+markdown-editor.pl의 code에는 다음이 추가되야 합니다.
 
 	#!perl
-	# markdown-edtor.pl
 	post '/convert' => sub {
 	    my $self = shift;
 	
@@ -229,9 +230,9 @@ Markdown을 HTML로 보여주는 충실한 editor로써 어떤 기능이 필요�
 	    return $self->render_json( { html=> $html } );
 	};
 	
-	
+public directory 아래에 *markdown-editor.js* 라는 file을 만들어 jQuery code를 넣습니다.
+
     #!java
-    // markdown-editor.js
 	$(document).ready(function() {
 	  function markdown_to_html() {
 	    var markdown = $("#editor-markdown").val();
@@ -264,6 +265,8 @@ DB를 사용하지 않고 file을 저장하기 위해 구글느님의 힘을 빌
 [javascript-jquery-to-download-file-via-post-with-json-data](http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data)
 이 방법은 Text box내용을 일단 UUID를 이용하여 서버단의 mkd directory에 저장하고, iframe을 위한 다운로드 링크를 보내주면, jQuery의 콜백에서 iframe을 동적으로 만들어서 다운로드 받을 수 있는 다이얼로그 상자가 생기도록 하는 방법입니다.
 
+markdown-editor.pl에 다음을 추가합니다.
+
     #!perl
 	post '/save' => sub {
 	    my $self = shift;
@@ -285,6 +288,8 @@ DB를 사용하지 않고 file을 저장하기 위해 구글느님의 힘을 빌
 	    $self->res->headers->header('Content-Disposition' => qq{'attachment; filename="$uuid.mkd"'}); 
 	    return $self->render_text($markdown);
 	};
+
+markdown-editor.js에는 ready()함수 안에 다음을 추가합니다. _(jQuery의 모든 함수는 ready()안에 넣는걸 기본으로 합니다)_
 	
     #!java
 	  function save_markdown() {
@@ -313,7 +318,9 @@ UUID로 인해서 file명은 난해하지만 어쨌든 동작은 잘 됩니다!
 그러나 최종적인 결과물이 화면에 어떻게 뿌려질지는 한번쯤은 확인을 하고 싶은 것도 사실이죠.
 그래서 새탭에서 HTML을 열도록 했습니다. 
 방법은 save와 매우 비슷합니다. mkd directory에 저장을 하는 것 까지는 동일하고요, 그 뒤에, mkd file경로를 포함한 HTML link를 콜백으로 보내면, jQuery에서 새로운 browser tab를 띄워서 보여주는 방법입니다. 
- 통일성을 위해 새로운 탭용 layout이 추가로 필요하기도 합니다.
+통일성을 위해 새로운 탭용 layout이 추가로 필요하기도 합니다.
+
+markdown-editor.pl에 다음을 추가합니다.
 
 	#!perl
 	get '/html/:uuid' => sub {
@@ -364,7 +371,7 @@ UUID로 인해서 file명은 난해하지만 어쨌든 동작은 잘 됩니다!
 	  </body>
 	</html>
 	
-	
+markdown-editor.js에는 다음의 code를 역시 ready()안에 추가합니다.    
 	
 	#!java
 	  function open_html() {
@@ -670,6 +677,7 @@ style.css
 [navbar]: http://twitter.github.com/bootstrap/components.html#navbar
 [firebug]: https://www.getfirebug.com/
 
+[img-00]: ./img-00.png
 [img-01]: ./img-01.png
 [img-02]: ./img-02.png
 [img-03]: ./img-03.png
